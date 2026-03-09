@@ -56,14 +56,14 @@ text-transform:uppercase;
 .tabla{
 width:100%;
 border-collapse:collapse;
-table-layout:auto;
-font-size:8.7pt;
+table-layout:fixed;
+font-size:8.3pt;
 }
 
 .tabla th,
 .tabla td{
 border:0.3mm solid #a3a3a3;
-padding:1.8mm 1.6mm;
+padding:1.6mm 1.4mm;
 vertical-align:middle;
 white-space:nowrap;
 overflow:visible;
@@ -75,7 +75,7 @@ line-height:1.1;
 background:#f1f1f1;
 font-weight:700;
 text-align:center;
-font-size:8.4pt;
+font-size:8.1pt;
 }
 
 .tabla td{
@@ -83,11 +83,11 @@ text-align:left;
 }
 
 .col-cantidad{width:10%;}
-.col-producto{width:34%;}
+.col-producto{width:38%;}
 .col-color{width:10%;}
-.col-lote{width:14%;}
-.col-lote-glicerina{width:16%;}
-.col-lote-envases{width:16%;}
+.col-lote{width:16%;}
+.col-lote-glicerina{width:13%;}
+.col-lote-envases{width:13%;}
 
 @media print{
 @page{
@@ -169,16 +169,16 @@ tabla.style.display = "table";
 
 for(let i = 1; i < lineas.length; i++){
 const linea = lineas[i];
-const partes = linea.split("|").map(x => x.trim());
+const partes = linea.split(/\s+/);
 
-if(partes.length < 6) continue;
+if(partes.length < 11) continue;
 
 const cantidad = partes[0];
-const producto = partes[1];
-const color = partes[2];
-const lote = partes[3];
-const loteGlicerina = partes[4];
-const loteEnvases = partes[5];
+const loteEnvases = partes[partes.length - 1];
+const loteGlicerina = partes[partes.length - 2];
+const lote = partes[partes.length - 3];
+const color = partes[partes.length - 6];
+const producto = partes.slice(1, partes.length - 6).join(" ");
 
 const fila = document.createElement("tr");
 fila.innerHTML = `
