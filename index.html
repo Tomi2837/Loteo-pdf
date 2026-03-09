@@ -2,204 +2,131 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loteo de mercaderia</title>
+<title>Loteo</title>
 
 <style>
-*{
-box-sizing:border-box;
-}
-
-html,body{
-margin:0;
-padding:0;
-background:#ffffff;
-font-family:Arial, Helvetica, sans-serif;
-color:#111111;
-}
 
 body{
+font-family:Arial;
 width:210mm;
-margin:0 auto;
+margin:auto;
 padding:4mm;
-}
-
-.page{
-width:100%;
-min-height:289mm;
-background:#ffffff;
 }
 
 .header-image{
 width:100%;
-display:block;
-margin:0;
 }
 
 .content-box{
-margin-top:7mm;
-border:0.35mm solid #707070;
-min-height:257mm;
-padding:10mm 7mm 8mm 7mm;
-background:#ffffff;
+margin-top:6mm;
+border:1px solid #777;
+padding:8mm;
+min-height:250mm;
 }
 
 .info-a{
-font-size:10.5pt;
-font-weight:800;
-margin:0 0 5mm 0;
-white-space:pre-wrap;
-word-break:break-word;
-text-transform:uppercase;
+font-size:14px;
+font-weight:bold;
+margin-bottom:10px;
 }
 
-.tabla{
+table{
 width:100%;
 border-collapse:collapse;
-table-layout:fixed;
-font-size:8.3pt;
+font-size:12px;
 }
 
-.tabla th,
-.tabla td{
-border:0.3mm solid #a3a3a3;
-padding:1.6mm 1.4mm;
-vertical-align:middle;
+th,td{
+border:1px solid #aaa;
+padding:5px;
 white-space:nowrap;
-overflow:visible;
-text-overflow:clip;
-line-height:1.1;
 }
 
-.tabla th{
-background:#f1f1f1;
-font-weight:700;
-text-align:center;
-font-size:8.1pt;
+th{
+background:#f2f2f2;
 }
 
-.tabla td{
-text-align:left;
-}
-
-.col-cantidad{width:10%;}
-.col-producto{width:38%;}
-.col-color{width:10%;}
-.col-lote{width:16%;}
-.col-lote-glicerina{width:13%;}
-.col-lote-envases{width:13%;}
-
-@media print{
-@page{
-size:A4 portrait;
-margin:0;
-}
-
-html,body{
-width:210mm;
-height:297mm;
-}
-
-body{
-padding:4mm;
-margin:0;
-}
-}
 </style>
 </head>
 <body>
 
-<div class="page">
-
-<img class="header-image" src="header.png" alt="Encabezado">
+<img class="header-image" src="header.png">
 
 <div class="content-box">
+
 <div id="infoA" class="info-a"></div>
 
-<table class="tabla" id="tabla" style="display:none;">
-<thead>
+<table id="tabla" style="display:none">
+
 <tr>
-<th class="col-cantidad">Cantidad</th>
-<th class="col-producto">Producto</th>
-<th class="col-color">Color</th>
-<th class="col-lote">Lote</th>
-<th class="col-lote-glicerina">Lote Glicerina</th>
-<th class="col-lote-envases">Lote Envases</th>
+<th>Cantidad</th>
+<th>Producto</th>
+<th>Color</th>
+<th>Cliente</th>
+<th>Lote</th>
+<th>Lote Glicerina</th>
+<th>Lote Envases</th>
 </tr>
-</thead>
-<tbody></tbody>
+
 </table>
-</div>
 
 </div>
 
 <script>
+
 function getParametro(nombre){
 const url = new URL(window.location.href);
 return decodeURIComponent(url.searchParams.get(nombre) || "");
 }
 
-function escaparHTML(texto){
-return String(texto)
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-}
-
-function cargarContenido(){
 const data = getParametro("data");
-if(!data) return;
 
-const lineas = data
-.replace(/\r/g,"")
-.split("\n")
-.map(x => x.trim())
-.filter(Boolean);
+if(data){
 
-if(!lineas.length) return;
+const lineas = data.split("\n");
 
-const infoA = document.getElementById("infoA");
+document.getElementById("infoA").innerText = lineas[0];
+
 const tabla = document.getElementById("tabla");
-const tbody = tabla.querySelector("tbody");
 
-infoA.textContent = lineas[0];
-tabla.style.display = "table";
+for(let i=1;i<lineas.length;i++){
 
-for(let i = 1; i < lineas.length; i++){
-const linea = lineas[i];
-const partes = linea.split(/\s+/);
-
-if(partes.length < 11) continue;
+const partes = lineas[i].split(" ");
 
 const cantidad = partes[0];
-const loteEnvases = partes[partes.length - 1];
-const loteGlicerina = partes[partes.length - 2];
-const lote = partes[partes.length - 3];
-const color = partes[partes.length - 6];
-const producto = partes.slice(1, partes.length - 6).join(" ");
+const loteEnvases = partes[partes.length-1];
+const loteGlicerina = partes[partes.length-2];
+const lote = partes[partes.length-3];
+const cliente = partes.slice(partes.length-6, partes.length-4).join(" ");
+const color = partes[partes.length-7];
+const producto = partes.slice(1, partes.length-7).join(" ");
 
 const fila = document.createElement("tr");
+
 fila.innerHTML = `
-<td>${escaparHTML(cantidad)}</td>
-<td>${escaparHTML(producto)}</td>
-<td>${escaparHTML(color)}</td>
-<td>${escaparHTML(lote)}</td>
-<td>${escaparHTML(loteGlicerina)}</td>
-<td>${escaparHTML(loteEnvases)}</td>
+<td>${cantidad}</td>
+<td>${producto}</td>
+<td>${color}</td>
+<td>${cliente}</td>
+<td>${lote}</td>
+<td>${loteGlicerina}</td>
+<td>${loteEnvases}</td>
 `;
-tbody.appendChild(fila);
-}
+
+tabla.appendChild(fila);
+
 }
 
-window.addEventListener("load", function(){
-cargarContenido();
+tabla.style.display="table";
 
+}
+
+window.onload=function(){
 setTimeout(function(){
 window.print();
-},700);
-});
+},600);
+}
+
 </script>
 
 </body>
