@@ -57,13 +57,13 @@ text-transform:uppercase;
 width:100%;
 border-collapse:collapse;
 table-layout:fixed;
-font-size:8.5pt;
+font-size:8.2pt;
 }
 
 .tabla th,
 .tabla td{
 border:0.3mm solid #a3a3a3;
-padding:1.8mm 1.6mm;
+padding:1.7mm 1.4mm;
 vertical-align:middle;
 line-height:1.1;
 white-space:nowrap;
@@ -75,21 +75,27 @@ text-overflow:clip;
 background:#f1f1f1;
 font-weight:700;
 text-align:center;
-font-size:8.3pt;
+font-size:7.9pt;
 }
 
 .tabla td{
 text-align:left;
 }
 
-.col-cantidad{width:10%;}
-.col-producto{width:25%;}
-.col-color{width:10%;}
+.col-cantidad{width:9%;}
+.col-producto{width:27%;}
+.col-color{width:9%;}
 .col-cliente{width:17%;}
-.col-remito{width:10%;}
+.col-remito{width:9%;}
 .col-lote{width:13%;}
-.col-glicerina{width:7.5%;}
-.col-envases{width:7.5%;}
+.col-glicerina{width:8%;}
+.col-envases{width:8%;}
+
+.estado{
+font-size:9pt;
+margin-top:5mm;
+color:#555555;
+}
 
 @media print{
 @page{
@@ -106,6 +112,10 @@ body{
 padding:4mm;
 margin:0;
 }
+
+.estado{
+display:none;
+}
 }
 </style>
 </head>
@@ -116,7 +126,7 @@ margin:0;
 <img class="header-image" src="header.png" alt="Encabezado">
 
 <div class="content-box">
-<div id="infoA" class="info-a"></div>
+<div id="infoA" class="info-a">Cargando...</div>
 
 <table class="tabla" id="tabla" style="display:none;">
 <thead>
@@ -133,18 +143,23 @@ margin:0;
 </thead>
 <tbody></tbody>
 </table>
+
+<div id="estado" class="estado"></div>
 </div>
 
 </div>
 
 <script>
+const SPREADSHEET_ID = "1MJfboS5VZlCknenj2ZTkiNlh1EugOs37zVz2iQc0iX8";
+const SHEET_NAME = "Resumen loteos";
+
 function getParametro(nombre){
 const url = new URL(window.location.href);
-return decodeURIComponent(url.searchParams.get(nombre) || "");
+return decodeURIComponent(url.searchParams.get(nombre) || "").trim();
 }
 
 function escaparHTML(texto){
-return String(texto)
+return String(texto ?? "")
 .replace(/&/g,"&amp;")
 .replace(/</g,"&lt;")
 .replace(/>/g,"&gt;")
@@ -152,67 +167,122 @@ return String(texto)
 .replace(/'/g,"&#039;");
 }
 
-function valorSeguro(valor){
-return valor ? valor : "";
+function setEstado(texto){
+document.getElementById("estado").textContent = texto || "";
 }
 
-function cargarContenido(){
-const data = getParametro("data");
-if(!data) return;
+function construirUrlGviz(){
+const query = encodeURIComponent("select A,B");
+return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tq=${query}`;
+}
 
-const lineas = data
+function leerValorCelda(celda){
+if(!celda) return "";
+if(typeof celda.v === "string") return celda.v.trim();
+if(celda.v === null || celda.v === undefined) return "";
+return String(celda.v).trim();
+}
+
+async function obtenerResumenes(){
+const response = await fetch(construirUrlGviz());
+if(!response.ok){
+throw new Error("No se pudo leer la hoja");
+}
+
+const text = await response.text();
+const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]+)\);/);
+
+if(!match || !match[1]){
+throw new Error("Respuesta invalida de Google Sheets");
+}
+
+const json = JSON.parse(match[1]);
+const rows = (json.table && json.table.rows) ? json.table.rows : [];
+
+return rows.map(row => {
+const c = row.c || [];
+return {
+titulo: leerValorCelda(c[0]),
+texto: leerValorCelda(c[1])
+};
+});
+}
+
+function agregarFila(tbody, partes){
+const fila = document.createElement("tr");
+fila.innerHTML = `
+<td>${escaparHTML(partes[0] || "")}</td>
+<td>${escaparHTML(partes[1] || "")}</td>
+<td>${escaparHTML(partes[2] || "")}</td>
+<td>${escaparHTML(partes[3] || "")}</td>
+<td>${escaparHTML(partes[4] || "")}</td>
+<td>${escaparHTML(partes[5] || "")}</td>
+<td>${escaparHTML(partes[6] || "")}</td>
+<td>${escaparHTML(partes[7] || "")}</td>
+`;
+tbody.appendChild(fila);
+}
+
+function cargarTablaDesdeTexto(texto){
+const tabla = document.getElementById("tabla");
+const tbody = tabla.querySelector("tbody");
+
+tbody.innerHTML = "";
+
+const lineas = texto
 .replace(/\r/g,"")
 .split("\n")
 .map(x => x.trim())
 .filter(Boolean);
 
-if(!lineas.length) return;
-
-const titulo = lineas[0];
-const tabla = document.getElementById("tabla");
-const tbody = tabla.querySelector("tbody");
-
-document.getElementById("infoA").textContent = titulo;
-
-for(let i = 1; i < lineas.length; i++){
-const linea = lineas[i];
+lineas.forEach(linea => {
 const partes = linea.split("*").map(x => x.trim());
+if(partes.length < 8) return;
+agregarFila(tbody, partes);
+});
 
-if(partes.length < 8) continue;
-
-const cantidad = valorSeguro(partes[0]);
-const producto = valorSeguro(partes[1]);
-const color = valorSeguro(partes[2]);
-const cliente = valorSeguro(partes[3]);
-const remito = valorSeguro(partes[4]);
-const lote = valorSeguro(partes[5]);
-const glicerina = valorSeguro(partes[6]);
-const envases = valorSeguro(partes[7]);
-
-const fila = document.createElement("tr");
-fila.innerHTML = `
-<td>${escaparHTML(cantidad)}</td>
-<td>${escaparHTML(producto)}</td>
-<td>${escaparHTML(color)}</td>
-<td>${escaparHTML(cliente)}</td>
-<td>${escaparHTML(remito)}</td>
-<td>${escaparHTML(lote)}</td>
-<td>${escaparHTML(glicerina)}</td>
-<td>${escaparHTML(envases)}</td>
-`;
-tbody.appendChild(fila);
-}
-
+if(tbody.children.length){
 tabla.style.display = "table";
 }
+}
 
-window.addEventListener("load", function(){
-cargarContenido();
+async function iniciar(){
+const id = getParametro("id");
+const infoA = document.getElementById("infoA");
+
+if(!id){
+infoA.textContent = "Falta el parametro id";
+setEstado("Usa un link tipo ?id=Marzo%202026");
+return;
+}
+
+setEstado("Cargando datos...");
+
+try{
+const resumenes = await obtenerResumenes();
+const fila = resumenes.find(x => x.titulo === id);
+
+if(!fila){
+infoA.textContent = "No encontrado";
+setEstado("No existe una fila en '" + SHEET_NAME + "' con A = " + id);
+return;
+}
+
+infoA.textContent = fila.titulo;
+cargarTablaDesdeTexto(fila.texto);
+setEstado("Listo");
 
 setTimeout(function(){
 window.print();
 },700);
-});
+
+}catch(error){
+infoA.textContent = "Error al cargar";
+setEstado(error.message || "No se pudo cargar la hoja");
+}
+}
+
+window.addEventListener("load", iniciar);
 </script>
 
 </body>
