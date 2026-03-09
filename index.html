@@ -2,131 +2,181 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Loteo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loteo de mercaderia</title>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
+html,body{
+margin:0;
+padding:0;
+background:#ffffff;
+font-family:Arial, Helvetica, sans-serif;
+color:#111111;
+}
 
 body{
-font-family:Arial;
 width:210mm;
-margin:auto;
+margin:0 auto;
 padding:4mm;
+}
+
+.page{
+width:100%;
+min-height:289mm;
+background:#ffffff;
 }
 
 .header-image{
 width:100%;
+display:block;
+margin:0;
 }
 
 .content-box{
-margin-top:6mm;
-border:1px solid #777;
-padding:8mm;
-min-height:250mm;
+margin-top:7mm;
+border:0.35mm solid #707070;
+min-height:257mm;
+padding:9mm 7mm 8mm 7mm;
+background:#ffffff;
 }
 
 .info-a{
-font-size:14px;
-font-weight:bold;
-margin-bottom:10px;
+font-size:10.5pt;
+font-weight:800;
+margin:0 0 5mm 0;
+white-space:pre-wrap;
+word-break:break-word;
+text-transform:uppercase;
 }
 
-table{
+.tabla{
 width:100%;
 border-collapse:collapse;
-font-size:12px;
+table-layout:fixed;
+font-size:7.4pt;
 }
 
-th,td{
-border:1px solid #aaa;
-padding:5px;
+.tabla th,
+.tabla td{
+border:0.3mm solid #a3a3a3;
+padding:1.6mm 1.4mm;
+vertical-align:middle;
+line-height:1.05;
+}
+
+.tabla th{
+background:#f1f1f1;
+font-weight:700;
+text-align:center;
+font-size:7.2pt;
 white-space:nowrap;
 }
 
-th{
-background:#f2f2f2;
+.texto-completo{
+white-space:nowrap;
+overflow:hidden;
+text-overflow:clip;
+font-size:7.2pt;
 }
 
+@media print{
+@page{
+size:A4 portrait;
+margin:0;
+}
+
+html,body{
+width:210mm;
+height:297mm;
+}
+
+body{
+padding:4mm;
+margin:0;
+}
+}
 </style>
 </head>
 <body>
 
-<img class="header-image" src="header.png">
+<div class="page">
+
+<img class="header-image" src="header.png" alt="Encabezado">
 
 <div class="content-box">
-
 <div id="infoA" class="info-a"></div>
 
-<table id="tabla" style="display:none">
-
+<table class="tabla" id="tabla" style="display:none;">
+<thead>
 <tr>
 <th>Cantidad</th>
 <th>Producto</th>
 <th>Color</th>
 <th>Cliente</th>
+<th>Remito</th>
 <th>Lote</th>
-<th>Lote Glicerina</th>
-<th>Lote Envases</th>
+<th>Glicerina</th>
+<th>Envases</th>
 </tr>
-
+</thead>
+<tbody></tbody>
 </table>
+</div>
 
 </div>
 
 <script>
-
 function getParametro(nombre){
 const url = new URL(window.location.href);
 return decodeURIComponent(url.searchParams.get(nombre) || "");
 }
 
+function escaparHTML(texto){
+return String(texto)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
+
+function cargarContenido(){
 const data = getParametro("data");
+if(!data) return;
 
-if(data){
+const lineas = data
+.replace(/\r/g,"")
+.split("\n")
+.map(x => x.trim())
+.filter(Boolean);
 
-const lineas = data.split("\n");
+if(!lineas.length) return;
 
-document.getElementById("infoA").innerText = lineas[0];
+document.getElementById("infoA").textContent = lineas[0];
 
 const tabla = document.getElementById("tabla");
+const tbody = tabla.querySelector("tbody");
 
-for(let i=1;i<lineas.length;i++){
-
-const partes = lineas[i].split(" ");
-
-const cantidad = partes[0];
-const loteEnvases = partes[partes.length-1];
-const loteGlicerina = partes[partes.length-2];
-const lote = partes[partes.length-3];
-const cliente = partes.slice(partes.length-6, partes.length-4).join(" ");
-const color = partes[partes.length-7];
-const producto = partes.slice(1, partes.length-7).join(" ");
-
+for(let i = 1; i < lineas.length; i++){
 const fila = document.createElement("tr");
-
-fila.innerHTML = `
-<td>${cantidad}</td>
-<td>${producto}</td>
-<td>${color}</td>
-<td>${cliente}</td>
-<td>${lote}</td>
-<td>${loteGlicerina}</td>
-<td>${loteEnvases}</td>
-`;
-
-tabla.appendChild(fila);
-
+fila.innerHTML = `<td class="texto-completo" colspan="8">${escaparHTML(lineas[i])}</td>`;
+tbody.appendChild(fila);
 }
 
-tabla.style.display="table";
-
+tabla.style.display = "table";
 }
 
-window.onload=function(){
+window.addEventListener("load", function(){
+cargarContenido();
+
 setTimeout(function(){
 window.print();
-},600);
-}
-
+},700);
+});
 </script>
 
 </body>
