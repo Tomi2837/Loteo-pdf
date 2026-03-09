@@ -105,7 +105,57 @@ tabla.appendChild(fila);
 
 }
 
-</script>
+<script>
 
+function getParametro(nombre){
+const url = new URL(window.location.href);
+return decodeURIComponent(url.searchParams.get(nombre) || "");
+}
+
+const data = getParametro("data");
+
+if(data){
+
+const lineas = data.split("\n");
+const tabla = document.getElementById("tabla");
+
+lineas.forEach(function(linea){
+
+if(!linea.trim()) return;
+
+const partes = linea.split(" ");
+
+const cantidad = partes[0];
+const lote = partes.pop();
+const remito = partes.pop();
+const cliente = partes.slice(-2).join(" ");
+const color = partes[partes.length-3];
+const producto = partes.slice(1, partes.length-3).join(" ");
+
+const fila = document.createElement("tr");
+
+fila.innerHTML = `
+<td>${cantidad}</td>
+<td>${producto}</td>
+<td>${color}</td>
+<td>${cliente}</td>
+<td>${remito}</td>
+<td>${lote}</td>
+`;
+
+tabla.appendChild(fila);
+
+});
+
+}
+
+// imprime automáticamente al abrir
+window.onload = function() {
+setTimeout(function(){
+window.print();
+},500);
+}
+
+</script>
 </body>
 </html>
