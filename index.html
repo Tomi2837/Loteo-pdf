@@ -30,71 +30,9 @@ min-height:289mm;
 background:#ffffff;
 }
 
-/* RECOMENDADO: USAR UNA IMAGEN DE ENCABEZADO */
 .header-image{
 width:100%;
 display:block;
-border:0;
-margin:0;
-}
-
-/* SI NO CARGA LA IMAGEN, QUEDA UN HEADER DECENTE */
-.header-fallback{
-display:none;
-width:100%;
-height:24mm;
-border-top:3.5mm solid #2f2b2d;
-grid-template-columns:67mm 50mm 1fr;
-}
-
-.header-fallback.show{
-display:grid;
-}
-
-.header-cell{
-border:0.35mm solid #707070;
-border-top:none;
-background:#f8f8f8;
-display:flex;
-align-items:center;
-justify-content:center;
-height:20.5mm;
-overflow:hidden;
-}
-
-.header-cell.logo-cell{
-padding:2mm 3mm;
-justify-content:flex-start;
-}
-
-.logo{
-max-width:56mm;
-max-height:15mm;
-display:block;
-object-fit:contain;
-}
-
-.code-wrap{
-width:100%;
-height:100%;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:flex-start;
-padding-left:4mm;
-line-height:1;
-}
-
-.code{
-font-size:12pt;
-font-weight:800;
-letter-spacing:0;
-margin:0 0 1.5mm 0;
-}
-
-.subtitle{
-font-size:7pt;
-font-weight:700;
 margin:0;
 }
 
@@ -102,7 +40,7 @@ margin:0;
 margin-top:7mm;
 border:0.35mm solid #707070;
 min-height:257mm;
-padding:10mm 9mm 8mm 9mm;
+padding:10mm 7mm 8mm 7mm;
 background:#ffffff;
 }
 
@@ -118,37 +56,38 @@ text-transform:uppercase;
 .tabla{
 width:100%;
 border-collapse:collapse;
-table-layout:fixed;
-font-size:9.4pt;
+table-layout:auto;
+font-size:8.7pt;
 }
 
 .tabla th,
 .tabla td{
 border:0.3mm solid #a3a3a3;
-padding:2.2mm 2.1mm;
+padding:1.8mm 1.6mm;
 vertical-align:middle;
 white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
+overflow:visible;
+text-overflow:clip;
+line-height:1.1;
 }
 
 .tabla th{
 background:#f1f1f1;
 font-weight:700;
 text-align:center;
-font-size:8.8pt;
+font-size:8.4pt;
 }
 
 .tabla td{
 text-align:left;
 }
 
-.col-cantidad{width:14%;}
-.col-producto{width:30%;}
-.col-color{width:9%;}
-.col-cliente{width:19%;}
-.col-remito{width:11%;}
-.col-lote{width:17%;}
+.col-cantidad{width:10%;}
+.col-producto{width:34%;}
+.col-color{width:10%;}
+.col-lote{width:14%;}
+.col-lote-glicerina{width:16%;}
+.col-lote-envases{width:16%;}
 
 @media print{
 @page{
@@ -172,29 +111,7 @@ margin:0;
 
 <div class="page">
 
-<!-- PONE ACA UNA IMAGEN DEL ENCABEZADO ENTERO -->
-<img
-id="headerImage"
-class="header-image"
-src="header.png"
-alt="Encabezado"
-onerror="mostrarFallback()"
->
-
-<div id="headerFallback" class="header-fallback">
-<div class="header-cell logo-cell">
-<img src="logo.png" class="logo" alt="Logo Muffler">
-</div>
-
-<div class="header-cell">
-<div class="code-wrap">
-<div class="code">FO1LT01</div>
-<div class="subtitle">Loteo de mercaderia</div>
-</div>
-</div>
-
-<div class="header-cell"></div>
-</div>
+<img class="header-image" src="header.png" alt="Encabezado">
 
 <div class="content-box">
 <div id="infoA" class="info-a"></div>
@@ -205,9 +122,9 @@ onerror="mostrarFallback()"
 <th class="col-cantidad">Cantidad</th>
 <th class="col-producto">Producto</th>
 <th class="col-color">Color</th>
-<th class="col-cliente">Cliente</th>
-<th class="col-remito">Remito</th>
 <th class="col-lote">Lote</th>
+<th class="col-lote-glicerina">Lote Glicerina</th>
+<th class="col-lote-envases">Lote Envases</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -217,11 +134,6 @@ onerror="mostrarFallback()"
 </div>
 
 <script>
-function mostrarFallback(){
-document.getElementById("headerImage").style.display = "none";
-document.getElementById("headerFallback").classList.add("show");
-}
-
 function getParametro(nombre){
 const url = new URL(window.location.href);
 return decodeURIComponent(url.searchParams.get(nombre) || "");
@@ -257,25 +169,25 @@ tabla.style.display = "table";
 
 for(let i = 1; i < lineas.length; i++){
 const linea = lineas[i];
-const partes = linea.split(/\s+/);
+const partes = linea.split("|").map(x => x.trim());
 
-if(partes.length < 7) continue;
+if(partes.length < 6) continue;
 
 const cantidad = partes[0];
-const lote = partes[partes.length - 1];
-const remito = partes[partes.length - 2];
-const cliente = partes.slice(partes.length - 4, partes.length - 2).join(" ");
-const color = partes[partes.length - 5];
-const producto = partes.slice(1, partes.length - 5).join(" ");
+const producto = partes[1];
+const color = partes[2];
+const lote = partes[3];
+const loteGlicerina = partes[4];
+const loteEnvases = partes[5];
 
 const fila = document.createElement("tr");
 fila.innerHTML = `
 <td>${escaparHTML(cantidad)}</td>
 <td>${escaparHTML(producto)}</td>
 <td>${escaparHTML(color)}</td>
-<td>${escaparHTML(cliente)}</td>
-<td>${escaparHTML(remito)}</td>
 <td>${escaparHTML(lote)}</td>
+<td>${escaparHTML(loteGlicerina)}</td>
+<td>${escaparHTML(loteEnvases)}</td>
 `;
 tbody.appendChild(fila);
 }
