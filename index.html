@@ -15,142 +15,140 @@ margin:0;
 padding:0;
 background:#ffffff;
 font-family:Arial, Helvetica, sans-serif;
-color:#000000;
+color:#111111;
 }
 
 body{
 width:210mm;
 margin:0 auto;
-padding:4px 5px;
+padding:4mm;
 }
 
 .page{
 width:100%;
-height:297mm;
+min-height:289mm;
 background:#ffffff;
 }
 
-/* HEADER EXACTO */
-.header{
+/* RECOMENDADO: USAR UNA IMAGEN DE ENCABEZADO */
+.header-image{
 width:100%;
-height:58px;
+display:block;
+border:0;
+margin:0;
+}
+
+/* SI NO CARGA LA IMAGEN, QUEDA UN HEADER DECENTE */
+.header-fallback{
+display:none;
+width:100%;
+height:24mm;
+border-top:3.5mm solid #2f2b2d;
+grid-template-columns:67mm 50mm 1fr;
+}
+
+.header-fallback.show{
 display:grid;
-grid-template-columns:151px 127px 1fr;
-border-top:7px solid #2c292a;
 }
 
 .header-cell{
-border:1px solid #7b7b7b;
+border:0.35mm solid #707070;
 border-top:none;
-height:51px;
 background:#f8f8f8;
 display:flex;
 align-items:center;
 justify-content:center;
+height:20.5mm;
 overflow:hidden;
 }
 
-.logo-cell{
-padding:4px 8px;
+.header-cell.logo-cell{
+padding:2mm 3mm;
 justify-content:flex-start;
 }
 
 .logo{
+max-width:56mm;
+max-height:15mm;
 display:block;
-width:143px;
-height:auto;
 object-fit:contain;
 }
 
-.code-block{
+.code-wrap{
 width:100%;
 height:100%;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:0 8px;
-}
-
-.code-inner{
-width:100%;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:flex-start;
+padding-left:4mm;
 line-height:1;
 }
 
 .code{
-font-size:24px;
+font-size:12pt;
 font-weight:800;
-letter-spacing:-0.4px;
-margin-bottom:2px;
+letter-spacing:0;
+margin:0 0 1.5mm 0;
 }
 
 .subtitle{
-font-size:11px;
+font-size:7pt;
 font-weight:700;
+margin:0;
 }
 
-.blank-cell{
-background:#f8f8f8;
-}
-
-/* CAJA GRANDE */
 .content-box{
-margin-top:17px;
-width:100%;
-height:639px;
-border:1px solid #7b7b7b;
-background:#f8f8f8;
-padding:28px 30px 20px 30px;
-overflow:hidden;
+margin-top:7mm;
+border:0.35mm solid #707070;
+min-height:257mm;
+padding:10mm 9mm 8mm 9mm;
+background:#ffffff;
 }
 
 .info-a{
-font-size:19px;
+font-size:10.5pt;
 font-weight:800;
-margin:0 0 14px 0;
+margin:0 0 5mm 0;
 white-space:pre-wrap;
 word-break:break-word;
+text-transform:uppercase;
 }
 
 .tabla{
 width:100%;
 border-collapse:collapse;
 table-layout:fixed;
-font-size:13px;
-background:#f8f8f8;
+font-size:9.4pt;
 }
 
 .tabla th,
 .tabla td{
-border:1px solid #a7a7a7;
-padding:6px 7px;
-height:28px;
+border:0.3mm solid #a3a3a3;
+padding:2.2mm 2.1mm;
 vertical-align:middle;
+white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
-white-space:nowrap;
 }
 
 .tabla th{
-font-size:12px;
+background:#f1f1f1;
 font-weight:700;
 text-align:center;
+font-size:8.8pt;
 }
 
 .tabla td{
-font-size:13px;
-font-weight:400;
+text-align:left;
 }
 
-.col-cantidad{ width:92px; }
-.col-producto{ width:auto; }
-.col-color{ width:64px; }
-.col-cliente{ width:128px; }
-.col-remito{ width:76px; }
-.col-lote{ width:114px; }
+.col-cantidad{width:14%;}
+.col-producto{width:30%;}
+.col-color{width:9%;}
+.col-cliente{width:19%;}
+.col-remito{width:11%;}
+.col-lote{width:17%;}
 
 @media print{
 @page{
@@ -164,12 +162,8 @@ height:297mm;
 }
 
 body{
-padding:4px 5px;
+padding:4mm;
 margin:0;
-}
-
-.page{
-height:297mm;
 }
 }
 </style>
@@ -178,21 +172,28 @@ height:297mm;
 
 <div class="page">
 
-<div class="header">
+<!-- PONE ACA UNA IMAGEN DEL ENCABEZADO ENTERO -->
+<img
+id="headerImage"
+class="header-image"
+src="header.png"
+alt="Encabezado"
+onerror="mostrarFallback()"
+>
+
+<div id="headerFallback" class="header-fallback">
 <div class="header-cell logo-cell">
 <img src="logo.png" class="logo" alt="Logo Muffler">
 </div>
 
 <div class="header-cell">
-<div class="code-block">
-<div class="code-inner">
+<div class="code-wrap">
 <div class="code">FO1LT01</div>
 <div class="subtitle">Loteo de mercaderia</div>
 </div>
 </div>
-</div>
 
-<div class="header-cell blank-cell"></div>
+<div class="header-cell"></div>
 </div>
 
 <div class="content-box">
@@ -216,6 +217,11 @@ height:297mm;
 </div>
 
 <script>
+function mostrarFallback(){
+document.getElementById("headerImage").style.display = "none";
+document.getElementById("headerFallback").classList.add("show");
+}
+
 function getParametro(nombre){
 const url = new URL(window.location.href);
 return decodeURIComponent(url.searchParams.get(nombre) || "");
