@@ -57,31 +57,39 @@ text-transform:uppercase;
 width:100%;
 border-collapse:collapse;
 table-layout:fixed;
-font-size:7.4pt;
+font-size:8.5pt;
 }
 
 .tabla th,
 .tabla td{
 border:0.3mm solid #a3a3a3;
-padding:1.6mm 1.4mm;
+padding:1.8mm 1.6mm;
 vertical-align:middle;
-line-height:1.05;
+line-height:1.1;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:clip;
 }
 
 .tabla th{
 background:#f1f1f1;
 font-weight:700;
 text-align:center;
-font-size:7.2pt;
-white-space:nowrap;
+font-size:8.3pt;
 }
 
-.texto-completo{
-white-space:nowrap;
-overflow:hidden;
-text-overflow:clip;
-font-size:7.2pt;
+.tabla td{
+text-align:left;
 }
+
+.col-cantidad{width:10%;}
+.col-producto{width:25%;}
+.col-color{width:10%;}
+.col-cliente{width:17%;}
+.col-remito{width:10%;}
+.col-lote{width:13%;}
+.col-glicerina{width:7.5%;}
+.col-envases{width:7.5%;}
 
 @media print{
 @page{
@@ -113,14 +121,14 @@ margin:0;
 <table class="tabla" id="tabla" style="display:none;">
 <thead>
 <tr>
-<th>Cantidad</th>
-<th>Producto</th>
-<th>Color</th>
-<th>Cliente</th>
-<th>Remito</th>
-<th>Lote</th>
-<th>Glicerina</th>
-<th>Envases</th>
+<th class="col-cantidad">Cantidad</th>
+<th class="col-producto">Producto</th>
+<th class="col-color">Color</th>
+<th class="col-cliente">Cliente</th>
+<th class="col-remito">Remito</th>
+<th class="col-lote">Lote</th>
+<th class="col-glicerina">Glicerina</th>
+<th class="col-envases">Envases</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -144,6 +152,10 @@ return String(texto)
 .replace(/'/g,"&#039;");
 }
 
+function valorSeguro(valor){
+return valor ? valor : "";
+}
+
 function cargarContenido(){
 const data = getParametro("data");
 if(!data) return;
@@ -156,14 +168,38 @@ const lineas = data
 
 if(!lineas.length) return;
 
-document.getElementById("infoA").textContent = lineas[0];
-
+const titulo = lineas[0];
 const tabla = document.getElementById("tabla");
 const tbody = tabla.querySelector("tbody");
 
+document.getElementById("infoA").textContent = titulo;
+
 for(let i = 1; i < lineas.length; i++){
+const linea = lineas[i];
+const partes = linea.split("*").map(x => x.trim());
+
+if(partes.length < 8) continue;
+
+const cantidad = valorSeguro(partes[0]);
+const producto = valorSeguro(partes[1]);
+const color = valorSeguro(partes[2]);
+const cliente = valorSeguro(partes[3]);
+const remito = valorSeguro(partes[4]);
+const lote = valorSeguro(partes[5]);
+const glicerina = valorSeguro(partes[6]);
+const envases = valorSeguro(partes[7]);
+
 const fila = document.createElement("tr");
-fila.innerHTML = `<td class="texto-completo" colspan="8">${escaparHTML(lineas[i])}</td>`;
+fila.innerHTML = `
+<td>${escaparHTML(cantidad)}</td>
+<td>${escaparHTML(producto)}</td>
+<td>${escaparHTML(color)}</td>
+<td>${escaparHTML(cliente)}</td>
+<td>${escaparHTML(remito)}</td>
+<td>${escaparHTML(lote)}</td>
+<td>${escaparHTML(glicerina)}</td>
+<td>${escaparHTML(envases)}</td>
+`;
 tbody.appendChild(fila);
 }
 
