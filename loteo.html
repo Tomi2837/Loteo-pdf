@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Resumen de Loteos</title>
+
+<style>
+
+body{
+font-family:Arial, sans-serif;
+padding:40px;
+background:#ffffff;
+}
+
+h2{
+margin-bottom:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+
+th,td{
+border:1px solid #cccccc;
+padding:8px;
+text-align:left;
+}
+
+th{
+background:#f2f2f2;
+}
+
+button{
+margin-top:20px;
+padding:10px 18px;
+font-size:14px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2>Resumen de Loteos</h2>
+
+<table id="tabla">
+
+<tr>
+<th>Cantidad</th>
+<th>Producto</th>
+<th>Color</th>
+<th>Cliente</th>
+<th>Remito</th>
+<th>Lote</th>
+</tr>
+
+</table>
+
+<button onclick="window.print()">Guardar PDF</button>
+
+<script>
+
+function getParametro(nombre){
+const url = new URL(window.location.href);
+return decodeURIComponent(url.searchParams.get(nombre) || "");
+}
+
+const data = getParametro("data");
+
+if(data){
+
+const lineas = data.split("\n");
+const tabla = document.getElementById("tabla");
+
+lineas.forEach(function(linea){
+
+if(!linea.trim()) return;
+
+const partes = linea.split(" ");
+
+const cantidad = partes[0];
+const lote = partes.pop();
+const remito = partes.pop();
+const cliente = partes.slice(-2).join(" ");
+const color = partes[partes.length-3];
+const producto = partes.slice(1, partes.length-3).join(" ");
+
+const fila = document.createElement("tr");
+
+fila.innerHTML = `
+<td>${cantidad}</td>
+<td>${producto}</td>
+<td>${color}</td>
+<td>${cliente}</td>
+<td>${remito}</td>
+<td>${lote}</td>
+`;
+
+tabla.appendChild(fila);
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
