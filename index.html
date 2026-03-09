@@ -1,181 +1,287 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Loteo de mercaderia</title>
 
 <style>
+*{
+box-sizing:border-box;
+}
+
+html,body{
+margin:0;
+padding:0;
+background:#ffffff;
+font-family:Arial, Helvetica, sans-serif;
+color:#000000;
+}
 
 body{
-margin:0;
-font-family:Arial, sans-serif;
-background:white;
+width:210mm;
+margin:0 auto;
+padding:4px 5px;
 }
 
 .page{
-width:210mm;
+width:100%;
 height:297mm;
-padding:8mm;
-box-sizing:border-box;
+background:#ffffff;
 }
 
+/* HEADER EXACTO */
 .header{
+width:100%;
+height:58px;
 display:grid;
-grid-template-columns:70mm 50mm 1fr;
-border-top:6px solid #2d292b;
+grid-template-columns:151px 127px 1fr;
+border-top:7px solid #2c292a;
 }
 
-.header div{
-border:1px solid #555;
-height:25mm;
+.header-cell{
+border:1px solid #7b7b7b;
+border-top:none;
+height:51px;
+background:#f8f8f8;
 display:flex;
 align-items:center;
 justify-content:center;
+overflow:hidden;
+}
+
+.logo-cell{
+padding:4px 8px;
+justify-content:flex-start;
 }
 
 .logo{
-max-height:18mm;
+display:block;
+width:143px;
+height:auto;
+object-fit:contain;
 }
 
-.codigo{
-font-size:20px;
+.code-block{
+width:100%;
+height:100%;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:0 8px;
+}
+
+.code-inner{
+width:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:flex-start;
+line-height:1;
+}
+
+.code{
+font-size:24px;
+font-weight:800;
+letter-spacing:-0.4px;
+margin-bottom:2px;
+}
+
+.subtitle{
+font-size:11px;
 font-weight:700;
 }
 
-.sub{
-font-size:12px;
+.blank-cell{
+background:#f8f8f8;
 }
 
-.box{
-margin-top:8mm;
-border:1px solid #555;
-height:250mm;
-padding:8mm;
-box-sizing:border-box;
+/* CAJA GRANDE */
+.content-box{
+margin-top:17px;
+width:100%;
+height:639px;
+border:1px solid #7b7b7b;
+background:#f8f8f8;
+padding:28px 30px 20px 30px;
+overflow:hidden;
 }
 
-.titulo{
-font-size:18px;
-font-weight:700;
-margin-bottom:10px;
+.info-a{
+font-size:19px;
+font-weight:800;
+margin:0 0 14px 0;
+white-space:pre-wrap;
+word-break:break-word;
 }
 
-table{
+.tabla{
 width:100%;
 border-collapse:collapse;
-font-size:14px;
+table-layout:fixed;
+font-size:13px;
+background:#f8f8f8;
 }
 
-td,th{
-border:1px solid #999;
-padding:6px;
+.tabla th,
+.tabla td{
+border:1px solid #a7a7a7;
+padding:6px 7px;
+height:28px;
+vertical-align:middle;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
 }
 
-th{
-background:#eee;
+.tabla th{
+font-size:12px;
+font-weight:700;
+text-align:center;
 }
 
+.tabla td{
+font-size:13px;
+font-weight:400;
+}
+
+.col-cantidad{ width:92px; }
+.col-producto{ width:auto; }
+.col-color{ width:64px; }
+.col-cliente{ width:128px; }
+.col-remito{ width:76px; }
+.col-lote{ width:114px; }
+
+@media print{
+@page{
+size:A4 portrait;
+margin:0;
+}
+
+html,body{
+width:210mm;
+height:297mm;
+}
+
+body{
+padding:4px 5px;
+margin:0;
+}
+
+.page{
+height:297mm;
+}
+}
 </style>
-
 </head>
-
 <body>
 
 <div class="page">
 
 <div class="header">
-
-<div>
-<img src="logo.png" class="logo">
+<div class="header-cell logo-cell">
+<img src="logo.png" class="logo" alt="Logo Muffler">
 </div>
 
-<div>
-<div>
-<div class="codigo">FO1LT01</div>
-<div class="sub">Loteo de mercaderia</div>
+<div class="header-cell">
+<div class="code-block">
+<div class="code-inner">
+<div class="code">FO1LT01</div>
+<div class="subtitle">Loteo de mercaderia</div>
 </div>
 </div>
-
-<div></div>
-
 </div>
 
-<div class="box">
+<div class="header-cell blank-cell"></div>
+</div>
 
-<div id="infoA" class="titulo"></div>
+<div class="content-box">
+<div id="infoA" class="info-a"></div>
 
-<table id="tabla">
-
+<table class="tabla" id="tabla" style="display:none;">
+<thead>
 <tr>
-<th>Cantidad</th>
-<th>Producto</th>
-<th>Color</th>
-<th>Cliente</th>
-<th>Remito</th>
-<th>Lote</th>
+<th class="col-cantidad">Cantidad</th>
+<th class="col-producto">Producto</th>
+<th class="col-color">Color</th>
+<th class="col-cliente">Cliente</th>
+<th class="col-remito">Remito</th>
+<th class="col-lote">Lote</th>
 </tr>
-
+</thead>
+<tbody></tbody>
 </table>
-
 </div>
 
 </div>
 
 <script>
-
 function getParametro(nombre){
 const url = new URL(window.location.href);
 return decodeURIComponent(url.searchParams.get(nombre) || "");
 }
 
+function escaparHTML(texto){
+return String(texto)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+}
+
+function cargarContenido(){
 const data = getParametro("data");
+if(!data) return;
 
-if(data){
+const lineas = data
+.replace(/\r/g,"")
+.split("\n")
+.map(x => x.trim())
+.filter(Boolean);
 
-const lineas = data.split("\n");
+if(!lineas.length) return;
 
-document.getElementById("infoA").innerText = lineas[0];
-
+const infoA = document.getElementById("infoA");
 const tabla = document.getElementById("tabla");
+const tbody = tabla.querySelector("tbody");
 
-for(let i=1;i<lineas.length;i++){
+infoA.textContent = lineas[0];
+tabla.style.display = "table";
 
+for(let i = 1; i < lineas.length; i++){
 const linea = lineas[i];
+const partes = linea.split(/\s+/);
 
-if(!linea.trim()) continue;
-
-const partes = linea.split(" ");
+if(partes.length < 7) continue;
 
 const cantidad = partes[0];
-const lote = partes.pop();
-const remito = partes.pop();
-const cliente = partes.slice(-2).join(" ");
-const color = partes[partes.length-3];
-const producto = partes.slice(1, partes.length-3).join(" ");
+const lote = partes[partes.length - 1];
+const remito = partes[partes.length - 2];
+const cliente = partes.slice(partes.length - 4, partes.length - 2).join(" ");
+const color = partes[partes.length - 5];
+const producto = partes.slice(1, partes.length - 5).join(" ");
 
 const fila = document.createElement("tr");
-
 fila.innerHTML = `
-<td>${cantidad}</td>
-<td>${producto}</td>
-<td>${color}</td>
-<td>${cliente}</td>
-<td>${remito}</td>
-<td>${lote}</td>
+<td>${escaparHTML(cantidad)}</td>
+<td>${escaparHTML(producto)}</td>
+<td>${escaparHTML(color)}</td>
+<td>${escaparHTML(cliente)}</td>
+<td>${escaparHTML(remito)}</td>
+<td>${escaparHTML(lote)}</td>
 `;
-
-tabla.appendChild(fila);
-
+tbody.appendChild(fila);
+}
 }
 
-}
+window.addEventListener("load", function(){
+cargarContenido();
 
-window.onload = function(){
 setTimeout(function(){
 window.print();
 },700);
-}
-
+});
 </script>
 
 </body>
