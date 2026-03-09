@@ -1,25 +1,63 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resumen de Loteos</title>
+<title>Loteo de mercaderia</title>
 
 <style>
-*{
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:white;
+}
+
+.page{
+width:210mm;
+height:297mm;
+padding:8mm;
 box-sizing:border-box;
 }
 
-body{
-font-family:Arial, sans-serif;
-padding:30px;
-background:#ffffff;
-color:#000000;
+.header{
+display:grid;
+grid-template-columns:70mm 50mm 1fr;
+border-top:6px solid #2d292b;
 }
 
-h2{
-margin:0 0 20px 0;
-font-size:24px;
+.header div{
+border:1px solid #555;
+height:25mm;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.logo{
+max-height:18mm;
+}
+
+.codigo{
+font-size:20px;
+font-weight:700;
+}
+
+.sub{
+font-size:12px;
+}
+
+.box{
+margin-top:8mm;
+border:1px solid #555;
+height:250mm;
+padding:8mm;
+box-sizing:border-box;
+}
+
+.titulo{
+font-size:18px;
+font-weight:700;
+margin-bottom:10px;
 }
 
 table{
@@ -28,42 +66,46 @@ border-collapse:collapse;
 font-size:14px;
 }
 
-th,td{
-border:1px solid #cccccc;
-padding:8px;
-text-align:left;
-vertical-align:top;
-word-break:break-word;
+td,th{
+border:1px solid #999;
+padding:6px;
 }
 
 th{
-background:#f2f2f2;
+background:#eee;
 }
 
-.estado{
-margin-top:16px;
-font-size:13px;
-color:#666666;
-}
-
-@media print{
-body{
-padding:10px;
-}
-
-.estado{
-display:none;
-}
-}
 </style>
+
 </head>
 
 <body>
 
-<h2>Resumen de Loteos</h2>
+<div class="page">
+
+<div class="header">
+
+<div>
+<img src="logo.png" class="logo">
+</div>
+
+<div>
+<div>
+<div class="codigo">FO1LT01</div>
+<div class="sub">Loteo de mercaderia</div>
+</div>
+</div>
+
+<div></div>
+
+</div>
+
+<div class="box">
+
+<div id="infoA" class="titulo"></div>
 
 <table id="tabla">
-<thead>
+
 <tr>
 <th>Cantidad</th>
 <th>Producto</th>
@@ -72,106 +114,68 @@ display:none;
 <th>Remito</th>
 <th>Lote</th>
 </tr>
-</thead>
-<tbody></tbody>
+
 </table>
 
-<div class="estado" id="estado">Generando documento...</div>
+</div>
+
+</div>
 
 <script>
+
 function getParametro(nombre){
 const url = new URL(window.location.href);
-return url.searchParams.get(nombre) || "";
+return decodeURIComponent(url.searchParams.get(nombre) || "");
 }
 
-function limpiarTexto(texto){
-return decodeURIComponent(texto)
-.replace(/\+/g, " ")
-.replace(/\r/g, "")
-.trim();
-}
+const data = getParametro("data");
 
-function escaparHTML(texto){
-return String(texto)
-.replace(/&/g, "&amp;")
-.replace(/</g, "&lt;")
-.replace(/>/g, "&gt;")
-.replace(/"/g, "&quot;")
-.replace(/'/g, "&#039;");
-}
+if(data){
 
-function cargarTabla(){
-const rawData = getParametro("data");
-const estado = document.getElementById("estado");
-const tbody = document.querySelector("#tabla tbody");
+const lineas = data.split("\n");
 
-if(!rawData){
-estado.textContent = "No se recibieron datos en el parametro data.";
-return false;
-}
+document.getElementById("infoA").innerText = lineas[0];
 
-const data = limpiarTexto(rawData);
-const lineas = data.split("\n").map(l => l.trim()).filter(Boolean);
+const tabla = document.getElementById("tabla");
 
-if(!lineas.length){
-estado.textContent = "El parametro data esta vacio o mal formado.";
-return false;
-}
+for(let i=1;i<lineas.length;i++){
 
-lineas.forEach(function(linea){
-const partes = linea.split(/\s+/);
+const linea = lineas[i];
 
-if(partes.length < 6){
-const filaError = document.createElement("tr");
-filaError.innerHTML = `
-<td colspan="6">Linea invalida: ${escaparHTML(linea)}</td>
-`;
-tbody.appendChild(filaError);
-return;
-}
+if(!linea.trim()) continue;
+
+const partes = linea.split(" ");
 
 const cantidad = partes[0];
-const lote = partes[partes.length - 1];
-const remito = partes[partes.length - 2];
-const cliente = partes.slice(partes.length - 4, partes.length - 2).join(" ");
-const color = partes[partes.length - 5];
-const producto = partes.slice(1, partes.length - 5).join(" ");
+const lote = partes.pop();
+const remito = partes.pop();
+const cliente = partes.slice(-2).join(" ");
+const color = partes[partes.length-3];
+const producto = partes.slice(1, partes.length-3).join(" ");
 
 const fila = document.createElement("tr");
-fila.innerHTML = `
-<td>${escaparHTML(cantidad)}</td>
-<td>${escaparHTML(producto)}</td>
-<td>${escaparHTML(color)}</td>
-<td>${escaparHTML(cliente)}</td>
-<td>${escaparHTML(remito)}</td>
-<td>${escaparHTML(lote)}</td>
-`;
-tbody.appendChild(fila);
-});
 
-estado.textContent = "Documento listo para imprimir.";
-return true;
+fila.innerHTML = `
+<td>${cantidad}</td>
+<td>${producto}</td>
+<td>${color}</td>
+<td>${cliente}</td>
+<td>${remito}</td>
+<td>${lote}</td>
+`;
+
+tabla.appendChild(fila);
+
 }
 
-window.addEventListener("load", function(){
-const ok = cargarTabla();
+}
 
-if(!ok) return;
-
-requestAnimationFrame(function(){
-requestAnimationFrame(function(){
+window.onload = function(){
 setTimeout(function(){
 window.print();
-},800);
-});
-});
-});
+},700);
+}
 
-window.onafterprint = function(){
-try{
-window.close();
-}catch(e){}
-};
 </script>
 
 </body>
